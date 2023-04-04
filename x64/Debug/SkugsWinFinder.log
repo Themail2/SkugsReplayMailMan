@@ -1,0 +1,11 @@
+﻿  main.cpp
+C:\Users\tanne\source\repos\SkugsWinFinder\main.cpp(25,28): warning C4311: 'type cast': pointer truncation from 'HMODULE' to 'DWORD'
+C:\Users\tanne\source\repos\SkugsWinFinder\main.cpp(25,28): warning C4302: 'type cast': truncation from 'HMODULE' to 'DWORD'
+C:\Users\tanne\source\repos\SkugsWinFinder\main.cpp(202,58): warning C4312: 'type cast': conversion from 'DWORD' to 'DWORD *' of greater size
+C:\Users\tanne\source\repos\SkugsWinFinder\main.cpp(210,51): warning C4312: 'type cast': conversion from 'DWORD' to 'DWORD *' of greater size
+C:\Users\tanne\source\repos\SkugsWinFinder\main.cpp(218,51): warning C4312: 'type cast': conversion from 'DWORD' to 'DWORD *' of greater size
+C:\Users\tanne\source\repos\SkugsWinFinder\main.cpp(237,53): warning C4312: 'type cast': conversion from 'DWORD' to 'PBYTE *' of greater size
+C:\Users\tanne\source\repos\SkugsWinFinder\main.cpp(238,53): warning C4312: 'type cast': conversion from 'DWORD' to 'PBYTE *' of greater size
+C:\Users\tanne\source\repos\SkugsWinFinder\main.cpp(248,55): warning C4312: 'type cast': conversion from 'DWORD' to 'PBYTE *' of greater size
+C:\Users\tanne\source\repos\SkugsWinFinder\main.cpp(249,55): warning C4312: 'type cast': conversion from 'DWORD' to 'PBYTE *' of greater size
+  SkugsWinFinder.vcxproj -> C:\Users\tanne\source\repos\SkugsWinFinder\x64\Debug\SkugsWinFinder.exe
