@@ -1,4 +1,4 @@
-# SkullgirlsReplayClient
+# Skullgirls Replay Mail Man
 This client application store replays created while playing SkullGirls on our servers for sharing and storage purposes. See README for more information.
 
 # How to set up the client
