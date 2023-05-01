@@ -5,6 +5,7 @@
 #include <string>
 #include <sys/stat.h>
 #include <filesystem>
+#include <vector>
 namespace fs = std::filesystem;
 using namespace std;
 
@@ -40,19 +41,23 @@ inline bool exists_test0(const std::string& name) {
 }
 // Checks the current list of replays on file against the replay directory for new entries
 vector<string> checkForNewReplays(vector<string> replays, string filePath) {
+	cout << "checkreplay function call" << endl;
 	vector<string> directoryContents;
+	vector<string> x;
 	// Populate directoryContents with the current contents of the replay directory
 	for (const auto& entry : filesystem::directory_iterator(filePath))
-		directoryContents.push_back(entry.path().string().erase(entry.path().string().find(filePath), filePath.length()));
+		directoryContents.push_back(entry.path().string());
 	// If this is true, we know there are new replays in the file system
-	if ((replays.size() + 2) == directoryContents.size())
+	if ((ssize(replays) + 2) == ssize(directoryContents))
 	{
-		// Replay files always come in pairs, so we grab the two newest ones and return them
-		vector<string> x;
-		x.push_back(directoryContents[replays.size() + 1]);
-		x.push_back(directoryContents[replays.size() + 2]);
+		// Replay files always come in pairs, so we grab the two newest ones and return their paths
+		cout << "here" << endl;
+		x.push_back(directoryContents[ssize(replays) ]);
+		x.push_back(directoryContents[ssize(replays) + 1]);
+		cout << "done" << endl;
 		return x;
 	}
+	return x;
 }
 int main()
 {
@@ -69,6 +74,7 @@ int main()
 	ofstream writeConfigFile;
 	ifstream readConfigFile;
 	string tempString;
+	vector<string> replaysOnFile;
 	// Check if config file exists in the working directory
 	if (exists_test0("config.cfg"))
 	{
@@ -92,8 +98,6 @@ int main()
 				cout << "It's typically in Documents\\SkullGirls\\Replays_SG2EPlus\\*bunchOfNumbers*" << endl << endl;
 				cout << "Please put the path to your skullgirls replay folder in now..." << endl;
 
-
-
 				getline(cin, tempString);
 
 				tempString.erase(remove(tempString.begin(), tempString.end(), '\"'), tempString.end());
@@ -103,21 +107,13 @@ int main()
 				cout << endl;
 				writeConfigFile.close();
 				readConfigFile.close();
-
-
 			}
 			else
 			{
-				cout << "found" << endl;
-				cout << configData << endl;
-
+				cout << "configData.cfg found!" << endl << endl;
+				
 			}
 		}
-		else
-		{
-
-		}
-		
 	}
 	else
 	{
@@ -128,13 +124,13 @@ int main()
 		newConfigFile.close();
 		writeConfigFile.open("config.cfg", std::ios::in | std::ios::out);
 		readConfigFile.open("config.cfg", std::ios::in | std::ios::out);
-		cout << "Error, No config data found" << endl;
+		cout << "Error, No config data found" << endl << endl;
 
 		cout << "Hello, welcome to initial setup for the skullgirls replay catalog client!" << endl;
 		cout << "I'm just going to need the path to the folder where your skullgirls replays live," << endl;
 		cout << "To do this, simply navigate to where they are in your file explorer." << endl;
 		cout << "Right click on the folder, and left click on 'Copy as Path', then, move" << endl;
-		cout << "back to this window and right click on it." << endl;
+		cout << "back to this window and right click anywhere in it." << endl;
 		cout << "It's typically in Documents\\SkullGirls\\Replays_SG2EPlus\\*bunchOfNumbers*" << endl << endl;
 		cout << "Please put the path to your skullgirls replay folder in now..." << endl;
 
@@ -150,36 +146,17 @@ int main()
 
 	if (exists_test0("replayList.xd"))
 	{
-		//Check to see if the list on file is correct
-		cout << "Current contents of replaylist.xd" << endl;
-		vector<string> replaysOnFile;
-		ifstream file("replayList.xd");
-		if (file.is_open()) 
+		//if we have one already, reset the list to the current working directory contents
+		cout << "replayList.xd found!" << endl;
+		cout << "Verifying integrity of replaylist.xd" << endl << endl;
+		ofstream newFile("replayList.xd");
+		if (newFile.is_open()) 
 		{
-			string line;
-			while (getline(file, line))
-			{
-				// using printf() in all tests for consistency
-				replaysOnFile.push_back(line.c_str());
-			}
-			file.close();
+			
+			for (const auto& entry : filesystem::directory_iterator(configData))
+				newFile << entry.path().string() << endl;
+			newFile.close();
 		}
-		for (int i = 0; i < replaysOnFile.size(); i++)
-		{
-			cout << replaysOnFile[i] << endl;
-		}
-	}
-	else
-	{
-		//Idiot user doesn't have a replayList.xd, guess we gotta make one
-		//Grab all files in path and add them to the replayList.xd
-		ofstream newReplayList("replayList.xd");
-		cout << "Did not find replayList.xd,\nPopulating replayList.xd" << endl;
-		for (const auto& entry : filesystem::directory_iterator(configData))
-			newReplayList << entry.path().string().erase(entry.path().string().find(configData), configData.length()) << endl;
-		newReplayList.close();
-		cout << "Current contents of replaylist.xd" << endl;
-		vector<string> replaysOnFile;
 		ifstream file("replayList.xd");
 		if (file.is_open())
 		{
@@ -191,13 +168,51 @@ int main()
 			}
 			file.close();
 		}
-		for (int i = 0; i < replaysOnFile.size(); i++)
-		{
-			cout << replaysOnFile[i] << endl;
-		}
+
+		cout << "Found: " << replaysOnFile.size() / 2 << " replays in " << configData << endl;
 	}
+	else
+	{
+		//Idiot user doesn't have a replayList.xd, guess we gotta make one
+		//Grab all files in path and add them to the replayList.xd
+		ofstream newReplayList("replayList.xd");
+		cout << "Did not find replayList.xd,\nPopulating replayList.xd" << endl;
+		for (const auto& entry : filesystem::directory_iterator(configData))
+			newReplayList << entry.path().string() << endl;
+		newReplayList.close();
+		
+		ifstream file("replayList.xd");
+		if (file.is_open())
+		{
+			string line;
+			while (getline(file, line))
+			{
+				// using printf() in all tests for consistency
+				replaysOnFile.push_back(line.c_str());
+			}
+			file.close();
+		}
+
+		cout << "Found: " << replaysOnFile.size() / 2 << " replays in " << configData << endl;
+	}
+	char esc_char = 27; // the decimal code for escape character is 27
+	cout << esc_char << "[1m" << "Launch Skullgirls now? Y/N?" << esc_char << "[0m" << endl;
+	getline(cin, tempString);
 	// Once we've established a proper config file and replaylist, launch skugs and start LOOKIN
-	ShellExecute(NULL, "open", "SkullGirls.exe", NULL, NULL, SW_SHOWDEFAULT);
+	if (tempString == "y" || tempString == "Y")
+	{
+		ShellExecute(NULL, "open", R"(SkullGirls.exe)", NULL, NULL, SW_SHOWDEFAULT);
+	}
+	else if (tempString == "n" || tempString == "N")
+	{
+		cout << "Goodbye.";
+		return 0;
+	}
+	else
+	{
+		cout << "Incorrect input, goodbye.";
+		return 0;
+	}
 	// Gotta wait for that bitch to INITIALIZE
 	Sleep(10000);
 	int readP2Win = 0;
@@ -220,7 +235,7 @@ int main()
 		DWORD P1WinOffset = 0x434;
 		DWORD P2WinOffset = 0x43C;
 		DWORD BaseAddress = GetBaseAddress(handle);
-		DWORD BaseAddressOffset = 0x00841984;
+		DWORD BaseAddressOffset = 0x0080B3B4;
 		
 		//Uncomment the print statements for de-bugging reasons!
 
@@ -258,18 +273,21 @@ int main()
 		}
 		else
 		{
-			cout << "Press Num Pad 0 to Exit..." << endl;
+			cout << "Scanning for new replays..." << endl;
 			int p1WinTemp = 0;
 			int p2WinTemp = 0;
+			vector<string> newReplays;
 			string currentWinner;
 			while (true) 
 			{
+				Sleep(500);
 				// Check win ints in mem
 				ReadProcessMemory(handle, (PBYTE*)AddressOfP1Win, &readP1Win, sizeof(int), 0);
 				ReadProcessMemory(handle, (PBYTE*)AddressOfP2Win, &readP2Win, sizeof(int), 0);
 				// if the win ints are zero we need to keep checking for them to not be zero
-				if (!readP1Win && !readP2Win) 
+				if (readP1Win == 0 && readP2Win == 0) 
 				{
+					cout << "P1 win int " << readP1Win << " P2 win int " << readP2Win << endl;
 					while (true) 
 					{
 						// Once per second we need to check if the win ints are not zero
@@ -282,34 +300,47 @@ int main()
 						if (isRunning(FindWindowA(NULL, "Skullgirls Encore")))
 						{
 							// If the win ints were zero and are now not zero 
-							if (readP1Win || readP2Win)
+							if (readP1Win == 1 || readP2Win == 1)
 							{
-								
+								cout << "P1 win int " << readP1Win << " P2 win int " << readP2Win << endl;
 								// Enter this loop and check to make see when they return to zero
 								while (true)
 								{
-									ReadProcessMemory(handle, (PBYTE*)AddressOfP1Win, &readP1Win, sizeof(int), 0);
-									ReadProcessMemory(handle, (PBYTE*)AddressOfP2Win, &readP2Win, sizeof(int), 0);
-									if (!readP1Win && !readP1Win)
+									if (isRunning(FindWindowA(NULL, "Skullgirls Encore")))
 									{
-										if (p1WinTemp > p2WinTemp)
+										Sleep(1000);
+										ReadProcessMemory(handle, (PBYTE*)AddressOfP1Win, &readP1Win, sizeof(int), 0);
+										ReadProcessMemory(handle, (PBYTE*)AddressOfP2Win, &readP2Win, sizeof(int), 0);
+										if (readP1Win == 0 && readP1Win == 0)
 										{
-											currentWinner = "Player 1";
+											if (p1WinTemp > p2WinTemp)
+											{
+												currentWinner = "Player 1";
+											}
+											else
+											{
+												currentWinner = "Player 2";
+											}
+											newReplays = checkForNewReplays(replaysOnFile, configData);
+											if (newReplays.size() == 2)
+											{
+												// Package request to backend
+												replaysOnFile.push_back(newReplays[0]);
+												replaysOnFile.push_back(newReplays[1]);
+												cout << newReplays[0] << '\n' << newReplays[1] << '\n' << currentWinner << endl;
 
+											}
+											else
+											{
+												cout << "No new replays found" << endl;
+											}
+											break;
 										}
-										else
-										{
-											currentWinner = "Player 2";
-										}
-										checkForNewReplays(replaysOnFile, configData)
+										p1WinTemp = readP1Win;
+										p2WinTemp = readP2Win;
 									}
-									p1WinTemp = readP1Win;
-									p2WinTemp = readP2Win;
 								}
-
-
 							}
-
 						}
 						else
 						{
